@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { Wordline } from "./ui/Reveal";
 import { useLang } from "../i18n/LangContext";
@@ -42,6 +42,16 @@ export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [activeCard, setActiveCard] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto transition between the 3 preview cards every ~800ms
+  useEffect(() => {
+    if (reduce || isPaused) return;
+    const interval = setInterval(() => {
+      setActiveCard((prev) => (prev + 1) % PREVIEW_CARDS.length);
+    }, 800);
+    return () => clearInterval(interval);
+  }, [reduce, isPaused]);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "16%"]);
@@ -178,21 +188,30 @@ export function Hero() {
               initial={reduce ? false : { opacity: 0, scale: 0.96, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
               className="relative overflow-hidden rounded-sm border border-white/15 bg-white/[0.03] p-3 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-lime/40"
             >
-              {/* Image Preview with Smooth Transition */}
+              {/* Image Preview Container with Pre-rendered Crossfade */}
               <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-indigo/30">
-                <img
-                  key={currentPreview.id}
-                  src={currentPreview.img}
-                  alt={lang === "ar" ? currentPreview.titleAr : currentPreview.titleEn}
-                  className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105"
-                />
+                {PREVIEW_CARDS.map((card, idx) => (
+                  <img
+                    key={card.id}
+                    src={card.img}
+                    alt={lang === "ar" ? card.titleAr : card.titleEn}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-in-out ${
+                      activeCard === idx
+                        ? "opacity-100 scale-[1.04]"
+                        : "opacity-0 scale-100 pointer-events-none"
+                    }`}
+                  />
+                ))}
+
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
 
                 {/* Floating pill badge */}
                 <div className="absolute top-3 start-3">
-                  <span className="rounded-full border border-lime/40 bg-ink/80 px-3 py-1 text-[10.5px] font-semibold text-lime backdrop-blur-md">
+                  <span className="rounded-full border border-lime/40 bg-ink/80 px-3 py-1 text-[10.5px] font-semibold text-lime backdrop-blur-md transition-all">
                     {lang === "ar" ? currentPreview.tagAr : currentPreview.tagEn}
                   </span>
                 </div>
@@ -202,10 +221,10 @@ export function Hero() {
                   <div className="text-[11px] text-lime font-display tracking-wider">
                     {c.hero.cardBadge}
                   </div>
-                  <h3 className="h-sub mt-1 text-[15px] font-bold text-white">
+                  <h3 className="h-sub mt-1 text-[15px] font-bold text-white transition-all">
                     {lang === "ar" ? currentPreview.titleAr : currentPreview.titleEn}
                   </h3>
-                  <div className="mt-1 text-[11.5px] text-white/60">
+                  <div className="mt-1 text-[11.5px] text-white/60 transition-all">
                     {lang === "ar" ? currentPreview.specsAr : currentPreview.specsEn}
                   </div>
                 </div>
@@ -219,15 +238,17 @@ export function Hero() {
                     <button
                       key={card.id}
                       type="button"
-                      onClick={() => setActiveCard(idx)}
-                      className={`relative flex items-center justify-center py-2 px-2 text-center text-[10px] md:text-[11px] transition-all duration-300 border ${
+                      onClick={() => {
+                        setActiveCard(idx);
+                      }}
+                      className={`relative flex items-center justify-center py-2.5 px-2 text-center text-[10px] md:text-[11px] transition-all duration-300 border ${
                         isActive
-                          ? "border-lime bg-lime/10 text-white font-semibold shadow-[0_0_15px_-4px_rgba(223,255,0,0.3)]"
+                          ? "border-lime bg-lime/15 text-white font-semibold shadow-[0_0_15px_-4px_rgba(223,255,0,0.4)]"
                           : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/30 hover:text-white"
                       }`}
                     >
                       {isActive && (
-                        <span className="absolute top-1 end-1 h-1 w-1 rounded-full bg-lime" />
+                        <span className="absolute top-1 end-1 h-1.5 w-1.5 rounded-full bg-lime animate-pulse" />
                       )}
                       <span className="truncate">
                         {lang === "ar" ? card.tagAr : card.tagEn}
