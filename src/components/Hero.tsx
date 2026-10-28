@@ -44,12 +44,12 @@ export function Hero() {
   const [activeCard, setActiveCard] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Auto transition between the 3 preview cards every ~800ms
+  // Auto transition between the 3 preview cards every 3.2 seconds (comfortable reading pace)
   useEffect(() => {
     if (reduce || isPaused) return;
     const interval = setInterval(() => {
       setActiveCard((prev) => (prev + 1) % PREVIEW_CARDS.length);
-    }, 800);
+    }, 3200);
     return () => clearInterval(interval);
   }, [reduce, isPaused]);
 
