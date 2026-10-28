@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+/* ---------- Brand typography (from TAM Brand Guidelines v1.0) ---------- */
+@font-face {
+  font-family: "Syncopate";
+  src: url("/fonts/Syncopate-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syncopate";
+  src: url("/fonts/Syncopate-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@theme {
+  --color-ink: #0f1103;
+  --color-indigo: #0f0566;
+  --color-lime: #dfff00;
+  --font-display: "Syncopate", ui-sans-serif, sans-serif;
+  --font-sans: "Poppins", ui-sans-serif, sans-serif;
+  --font-ar: "IBM Plex Sans Arabic", "Poppins", sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
+    scrollbar-color: #dfff00 #0f1103;
+  }
+  body {
+    background-color: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  html[lang="ar"] body,
+  html[lang="ar"] input,
+  html[lang="ar"] textarea,
+  html[lang="ar"] button {
+    font-family: var(--font-ar);
+  }
+  ::selection {
+    background: #dfff00;
+    color: #0f1103;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  }
+  .kicker {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  html[lang="ar"] .kicker {
+    font-family: var(--font-ar);
+    letter-spacing: normal;
+    font-size: 12px;
+  }
+  /* language-aware display sizes: Syncopate runs wide, Arabic runs tall */
+  .h-display {
+    font-family: var(--font-ar);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: normal;
+    font-size: clamp(2.3rem, 5.8vw, 4.8rem);
+  }
+  html[lang="en"] .h-display {
+    font-family: var(--font-display);
+    line-height: 1.06;
+    letter-spacing: 0.005em;
+    font-weight: 700;
+    font-size: clamp(1.45rem, 3.5vw, 3.05rem);
+  }
+  .h-title {
+    font-family: var(--font-ar);
+    font-weight: 700;
+    line-height: 1.24;
+    letter-spacing: normal;
+    font-size: clamp(1.65rem, 3.5vw, 2.75rem);
+  }
+  html[lang="en"] .h-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 2.05vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: 0.015em;
+  }
+  .h-sub {
+    font-family: var(--font-ar);
+    font-weight: 700;
+    line-height: 1.35;
+    font-size: 1.0625rem;
+    letter-spacing: normal;
+  }
+  html[lang="en"] .h-sub {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: 0.005em;
+  }
+  .body-copy {
+    font-family: var(--font-ar);
+    font-size: 15px;
+    line-height: 2.05;
+    letter-spacing: normal;
+  }
+  html[lang="en"] .body-copy {
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.85;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Hardware-accelerated continuous infinite marquee keyframes */
+@keyframes tam-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes tam-marquee-reverse {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Glow effects for luxury exhibition aesthetic */
+.glow-lime {
+  box-shadow: 0 0 35px -8px rgba(223, 255, 0, 0.35);
+}
+.glow-lime-subtle {
+  box-shadow: 0 0 25px -10px rgba(223, 255, 0, 0.2);
+}
+.glow-indigo {
+  box-shadow: 0 0 45px -10px rgba(15, 5, 102, 0.7);
+}
