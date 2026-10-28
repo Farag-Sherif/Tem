@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { motion } from "motion/react";
 import { useLang } from "../i18n/LangContext";
 import { Reveal } from "./ui/Reveal";
 import { Symbol } from "./ui/Symbol";
+import { Marquee } from "./ui/Marquee";
+
+const CURRENT_YEAR = new Date().getFullYear();
 
 export function Contact() {
-  const { c, lang } = useLang();
+  const { c, dir } = useLang();
   const [sent, setSent] = useState(false);
 
   return (
@@ -29,13 +31,13 @@ export function Contact() {
             </Reveal>
 
             <Reveal delay={0.06}>
-              <h2 className="mt-6 text-[clamp(1.9rem,4.6vw,3.6rem)] font-bold leading-[1.05] tracking-tight text-white font-ar">
+              <h2 className="mt-6 text-[clamp(1.9rem,4.6vw,3.6rem)] font-bold leading-[1.2] tracking-normal text-white font-ar">
                 {c.contact.title}
               </h2>
             </Reveal>
 
             <Reveal delay={0.12}>
-              <p className="body-copy mt-5 max-w-[46ch] text-white/60">{c.contact.lead}</p>
+              <p className="body-copy mt-5 max-w-[48ch] text-white/65">{c.contact.lead}</p>
             </Reveal>
 
             <Reveal delay={0.18}>
@@ -44,7 +46,7 @@ export function Contact() {
                   e.preventDefault();
                   setSent(true);
                 }}
-                className="mt-9 grid gap-4 sm:grid-cols-2"
+                className="mt-9 grid gap-5 sm:grid-cols-2"
               >
                 {[
                   { label: c.contact.name, ph: c.contact.namePh, span: false, area: false },
@@ -52,32 +54,32 @@ export function Contact() {
                   { label: c.contact.details, ph: c.contact.detailsPh, span: true, area: true },
                 ].map((f) => (
                   <label key={f.label} className={`block ${f.span ? "sm:col-span-2" : ""}`}>
-                    <span className="kicker text-[9.5px] text-white/40">{f.label}</span>
+                    <span className="kicker text-[11px] text-white/50">{f.label}</span>
                     {f.area ? (
                       <textarea
                         rows={3}
                         placeholder={f.ph}
-                        className="mt-2 w-full resize-none border-b border-white/20 bg-transparent py-2.5 text-[14px] text-white outline-none transition-colors placeholder:text-white/20 focus:border-lime"
+                        className="mt-2 w-full resize-none border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
                       />
                     ) : (
                       <input
                         required
                         placeholder={f.ph}
-                        className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14px] text-white outline-none transition-colors placeholder:text-white/20 focus:border-lime"
+                        className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
                       />
                     )}
                   </label>
                 ))}
 
-                <div className="mt-2 flex flex-wrap items-center gap-4 sm:col-span-2">
+                <div className="mt-3 flex flex-wrap items-center gap-4 sm:col-span-2">
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2.5 bg-lime px-6 py-3.5 text-[13px] font-semibold text-ink transition-transform duration-300 hover:-translate-y-0.5"
+                    className="inline-flex items-center gap-2.5 bg-lime px-7 py-3.5 text-[13.5px] font-bold text-ink shadow-[0_0_20px_-5px_rgba(223,255,0,0.35)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(223,255,0,0.5)] hover:-translate-y-0.5"
                   >
-                    {sent ? c.contact.sent : c.contact.submit}
-                    <span className="font-display text-[10px]">{sent ? "✓" : "↗"}</span>
+                    <span>{sent ? c.contact.sent : c.contact.submit}</span>
+                    <span className="font-display text-[11px]">{sent ? "✓" : dir === "rtl" ? "←" : "↗"}</span>
                   </button>
-                  <span className="text-[11px] text-white/30">
+                  <span className={`text-[12px] ${sent ? "text-lime font-medium" : "text-white/40"}`}>
                     {sent ? c.contact.thanks : c.contact.reply}
                   </span>
                 </div>
@@ -85,12 +87,12 @@ export function Contact() {
             </Reveal>
 
             <Reveal delay={0.24}>
-              <p className="mt-5 text-[10.5px] leading-[1.9] text-white/25">{c.contact.note}</p>
+              <p className="mt-6 text-[11px] leading-[1.9] text-white/30">{c.contact.note}</p>
             </Reveal>
           </div>
 
           <Reveal delay={0.14}>
-            <div className="relative h-full border border-white/12 p-6 md:p-8">
+            <div className="relative h-full border border-white/12 bg-white/[0.02] p-6 md:p-8">
               <img
                 src="/brand/logo-stacked.png"
                 alt="TAM Booths & more"
@@ -99,16 +101,16 @@ export function Contact() {
               <div className="mt-7 h-px w-full bg-white/12" />
               <div className="mt-6 space-y-4">
                 {c.contact.rows.map(([k, v]) => (
-                  <div key={k} className="flex items-start justify-between gap-5">
-                    <span className="shrink-0 text-[10.5px] text-white/35">{k}</span>
-                    <span className="text-end text-[12px] leading-relaxed text-white/80">{v}</span>
+                  <div key={k} className="flex items-start justify-between gap-5 border-b border-white/5 pb-3">
+                    <span className="shrink-0 text-[11px] font-medium text-white/40">{k}</span>
+                    <span className="text-end text-[12.5px] leading-relaxed text-white/85">{v}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-9 flex items-center gap-3">
-                <Symbol size={20} />
-                <span className="font-display text-[8.5px] tracking-[0.24em] text-white/30">
+              <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-4">
+                <Symbol size={22} />
+                <span className="font-display text-[9.5px] tracking-[0.24em] text-white/40">
                   BUILT PIECE BY PIECE
                 </span>
               </div>
@@ -117,46 +119,34 @@ export function Contact() {
         </div>
       </div>
 
-      <div className="relative border-t border-white/10">
+      <div className="relative border-t border-white/10 bg-ink">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-4 px-5 py-6 md:flex-row md:items-center md:px-8">
           <div className="flex flex-wrap items-center gap-3">
-            <img src="/brand/logo-alt.png" alt="TAM" className="h-4 w-auto opacity-70" />
-            <span className="text-[10.5px] text-white/28">
-              © {new Date().getFullYear()} TAM. {c.contact.footerNote}
+            <img src="/brand/logo-alt.png" alt="TAM" className="h-4 w-auto opacity-75" />
+            <span className="text-[11px] text-white/35">
+              © {CURRENT_YEAR} TAM. {c.contact.footerNote}
             </span>
           </div>
-          <div className="flex items-center gap-5">
-            <span className="font-display text-[8.5px] tracking-[0.2em] text-white/22">
+          <div className="flex items-center gap-6">
+            <span className="font-display text-[9px] tracking-[0.2em] text-white/30">
               {c.contact.version}
             </span>
-            <a href="#top" className="text-[10.5px] text-white/45 transition-colors hover:text-lime">
+            <a href="#top" className="text-[11px] text-white/55 transition-colors hover:text-lime">
               {c.contact.up}
             </a>
           </div>
         </div>
       </div>
 
-      <div className="relative overflow-hidden border-t border-white/10 py-3.5" dir="ltr">
-        <motion.div
-          className="flex w-max items-center gap-5"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-        >
-          {Array.from({ length: 2 }).map((_, k) => (
-            <div key={k} className="flex items-center gap-5">
-              {c.hero.ticker.map((t) => (
-                <span key={t + k} className="flex items-center gap-5">
-                  <span className="font-display text-[9.5px] tracking-[0.28em] text-white/25">{t}</span>
-                  <span className="h-1 w-1 bg-lime/60" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </motion.div>
+      {/* Rock-solid, continuous, infinite footer ticker that never disappears */}
+      <div className="relative border-t border-white/10 bg-ink/95 py-3.5">
+        <Marquee
+          items={c.hero.ticker}
+          speed={26}
+          className="text-white/30 font-display text-[10px] tracking-[0.26em]"
+          itemClassName="hover:text-lime transition-colors duration-300"
+        />
       </div>
-
-      {/* language hint for non-arabic visitors */}
-      {lang === "ar" ? null : null}
     </section>
   );
 }

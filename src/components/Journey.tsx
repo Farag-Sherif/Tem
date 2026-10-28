@@ -47,22 +47,22 @@ function Stage({
           <div className="flex items-center gap-3">
             <span
               className={`font-display text-[34px] font-bold leading-none transition-colors duration-500 ${
-                isActive ? "text-lime" : "text-white/15"
+                isActive ? "text-lime" : "text-white/20"
               }`}
             >
               {stage.n}
             </span>
-            <span className="kicker text-white/40">{stage.tag}</span>
+            <span className="kicker text-white/50">{stage.tag}</span>
           </div>
 
           <h3 className="h-title mt-5 text-white">{stage.title}</h3>
-          <p className="body-copy mt-4 max-w-[42ch] text-white/55">{stage.body}</p>
+          <p className="body-copy mt-4 max-w-[44ch] text-white/65">{stage.body}</p>
 
           <div className="mt-5 flex flex-wrap gap-2">
             {stage.chips.map((ch) => (
               <span
                 key={ch}
-                className="border border-white/15 px-2.5 py-1 text-[10.5px] text-white/45"
+                className="border border-white/15 bg-white/[0.02] px-2.5 py-1 text-[11px] text-white/60"
               >
                 {ch}
               </span>
@@ -71,7 +71,7 @@ function Stage({
         </div>
 
         <div className={`lg:col-span-8 ${mirrored ? "lg:order-1 lg:col-start-1" : ""}`}>
-          <div className="relative overflow-hidden bg-indigo/20">
+          <div className="relative overflow-hidden bg-indigo/20 border border-white/10">
             <motion.div style={reduce ? undefined : { y }} className="relative">
               <div className="aspect-[16/10] w-full overflow-hidden">
                 <motion.img
@@ -86,10 +86,10 @@ function Stage({
                 />
               </div>
             </motion.div>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
-            <div className="absolute bottom-3 start-4 flex items-center gap-2">
-              <span className={`h-1.5 w-1.5 transition-colors ${isActive ? "bg-lime" : "bg-white/30"}`} />
-              <span className="font-display text-[9px] tracking-[0.24em] text-white/60">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+            <div className="absolute bottom-3 start-4 flex items-center gap-2 bg-ink/70 px-2.5 py-1 backdrop-blur-md border border-white/10">
+              <span className={`h-1.5 w-1.5 rounded-full transition-colors ${isActive ? "bg-lime" : "bg-white/40"}`} />
+              <span className="font-display text-[9px] tracking-[0.2em] text-white/70">
                 STAGE {stage.n}
               </span>
             </div>
@@ -101,12 +101,12 @@ function Stage({
 }
 
 export function Journey() {
-  const { c } = useLang();
+  const { c, dir } = useLang();
   const [active, setActive] = useState(0);
   const stages = c.journey.stages;
 
   return (
-    <section id="journey" className="relative border-t border-white/10 py-20 md:py-28">
+    <section id="journey" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
           index="0.1"
@@ -116,7 +116,7 @@ export function Journey() {
         />
 
         <div className="mt-12 grid gap-10 lg:grid-cols-[120px_1fr] lg:gap-8">
-          {/* progress rail */}
+          {/* Progress rail */}
           <div className="relative hidden lg:block">
             <div className="sticky top-28">
               <div className="flex flex-col gap-3">
@@ -134,7 +134,7 @@ export function Journey() {
                     />
                     <span
                       className={`font-display text-[9.5px] tracking-[0.2em] transition-colors ${
-                        active === i ? "text-lime" : "text-white/25"
+                        active === i ? "text-lime font-bold" : "text-white/30"
                       }`}
                     >
                       {stages[i].n}
@@ -149,7 +149,7 @@ export function Journey() {
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 />
               </div>
-              <div className="mt-3 kicker text-[9px] text-white/25">{c.journey.stagesLabel}</div>
+              <div className="mt-3 kicker text-[9.5px] text-white/35">{c.journey.stagesLabel}</div>
             </div>
           </div>
 
@@ -161,20 +161,20 @@ export function Journey() {
             ))}
 
             <Reveal>
-              <div className="mt-10 flex flex-col items-start justify-between gap-5 border border-lime/25 bg-lime/[0.035] p-7 md:flex-row md:items-center md:p-9">
+              <div className="mt-12 flex flex-col items-start justify-between gap-5 border border-lime/30 bg-lime/[0.04] p-7 md:flex-row md:items-center md:p-9 shadow-[0_0_35px_-10px_rgba(223,255,0,0.1)]">
                 <div>
-                  <div className="font-display text-[10px] tracking-[0.26em] text-lime/70">
-                    {c.journey.stages[5].n} → 01
+                  <div className="font-display text-[10.5px] tracking-[0.26em] text-lime font-bold">
+                    {c.journey.stages[5].n} {dir === "rtl" ? "↺ 01" : "→ 01"}
                   </div>
-                  <h3 className="h-sub mt-3 text-white">{c.work.endTitle}</h3>
-                  <p className="body-copy mt-2 text-[13px] text-white/50">{c.work.endSub}</p>
+                  <h3 className="h-sub mt-3 text-white text-[19px]">{c.work.endTitle}</h3>
+                  <p className="body-copy mt-2 text-[13.5px] text-white/60">{c.work.endSub}</p>
                 </div>
                 <a
                   href="#contact"
-                  className="inline-flex shrink-0 items-center gap-2.5 bg-lime px-6 py-3.5 text-[13px] font-semibold text-ink"
+                  className="inline-flex shrink-0 items-center gap-2.5 bg-lime px-6 py-3.5 text-[13px] font-bold text-ink shadow-[0_0_20px_-5px_rgba(223,255,0,0.4)] hover:shadow-[0_0_30px_rgba(223,255,0,0.6)] transition-all"
                 >
-                  {c.work.endCta}
-                  <span className="font-display text-[10px]">↗</span>
+                  <span>{c.work.endCta}</span>
+                  <span className="font-display text-[10px]">{dir === "rtl" ? "←" : "→"}</span>
                 </a>
               </div>
             </Reveal>

@@ -3,13 +3,12 @@ import { type ReactNode } from "react";
 interface MarqueeProps {
   children?: ReactNode;
   items?: string[];
-  separator?: string;
+  separator?: ReactNode;
   speed?: number; // duration in seconds
   reverse?: boolean;
   pauseOnHover?: boolean;
   className?: string;
   itemClassName?: string;
-  dir?: "ltr" | "rtl";
 }
 
 /**
@@ -34,7 +33,9 @@ export function Marquee({
       {items.map((item, idx) => (
         <span key={`${item}-${idx}`} className="inline-flex items-center gap-6 shrink-0">
           <span className={itemClassName}>{item}</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-lime/70 shrink-0" aria-hidden="true" />
+          <span className="text-lime/70 text-[9px] shrink-0" aria-hidden="true">
+            {separator}
+          </span>
         </span>
       ))}
     </div>
