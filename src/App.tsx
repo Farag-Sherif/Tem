@@ -3,7 +3,7 @@ import { Loader } from "./components/Loader";
 import { Nav } from "./components/Nav";
 import { Hero } from "./components/Hero";
 import { Glance } from "./components/Glance";
-import { Journey } from "./components/Journey";
+import { BoothConfigurator } from "./components/BoothConfigurator";
 import { Services } from "./components/Services";
 import { Work } from "./components/Work";
 import { Standards } from "./components/Standards";
@@ -31,7 +31,7 @@ function Site() {
       <main>
         <Hero />
         <Glance />
-        <Journey />
+        <BoothConfigurator />
         <Services />
         <Work />
         <Standards />
