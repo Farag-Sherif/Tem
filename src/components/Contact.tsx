@@ -1,14 +1,29 @@
 import { useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { useLang } from "../i18n/LangContext";
 import { Reveal } from "./ui/Reveal";
 import { Symbol } from "./ui/Symbol";
 import { Marquee } from "./ui/Marquee";
+import { BoothConfigModal, type ConfiguratorData } from "./BoothConfigModal";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 export function Contact() {
   const { c, dir } = useLang();
   const [sent, setSent] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Controlled form state for pre-filling into modal
+  const [name, setName] = useState("");
+  const [reach, setReach] = useState("");
+  const [details, setDetails] = useState("");
+
+  const handleModalComplete = (data: ConfiguratorData) => {
+    setSent(true);
+    if (data.name) setName(data.name);
+    if (data.phone) setReach(data.phone);
+    if (data.notes) setDetails(data.notes);
+  };
 
   return (
     <section id="contact" className="relative overflow-hidden border-t border-white/10 bg-ink">
@@ -48,30 +63,41 @@ export function Contact() {
                 }}
                 className="mt-9 grid gap-5 sm:grid-cols-2"
               >
-                {[
-                  { label: c.contact.name, ph: c.contact.namePh, span: false, area: false },
-                  { label: c.contact.reach, ph: c.contact.reachPh, span: false, area: false },
-                  { label: c.contact.details, ph: c.contact.detailsPh, span: true, area: true },
-                ].map((f) => (
-                  <label key={f.label} className={`block ${f.span ? "sm:col-span-2" : ""}`}>
-                    <span className="kicker text-[11px] text-white/50">{f.label}</span>
-                    {f.area ? (
-                      <textarea
-                        rows={3}
-                        placeholder={f.ph}
-                        className="mt-2 w-full resize-none border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
-                      />
-                    ) : (
-                      <input
-                        required
-                        placeholder={f.ph}
-                        className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
-                      />
-                    )}
-                  </label>
-                ))}
+                <label className="block">
+                  <span className="kicker text-[11px] text-white/50">{c.contact.name}</span>
+                  <input
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder={c.contact.namePh}
+                    className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
+                  />
+                </label>
 
-                <div className="mt-3 flex flex-wrap items-center gap-4 sm:col-span-2">
+                <label className="block">
+                  <span className="kicker text-[11px] text-white/50">{c.contact.reach}</span>
+                  <input
+                    required
+                    value={reach}
+                    onChange={(e) => setReach(e.target.value)}
+                    placeholder={c.contact.reachPh}
+                    className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
+                  />
+                </label>
+
+                <label className="block sm:col-span-2">
+                  <span className="kicker text-[11px] text-white/50">{c.contact.details}</span>
+                  <textarea
+                    rows={3}
+                    value={details}
+                    onChange={(e) => setDetails(e.target.value)}
+                    placeholder={c.contact.detailsPh}
+                    className="mt-2 w-full resize-none border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
+                  />
+                </label>
+
+                <div className="mt-4 flex flex-wrap items-center gap-4 sm:col-span-2">
+                  {/* Primary Quick Submit Button */}
                   <button
                     type="submit"
                     className="inline-flex items-center gap-2.5 bg-lime px-7 py-3.5 text-[13.5px] font-bold text-ink shadow-[0_0_20px_-5px_rgba(223,255,0,0.35)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(223,255,0,0.5)] hover:-translate-y-0.5"
@@ -79,9 +105,22 @@ export function Contact() {
                     <span>{sent ? c.contact.sent : c.contact.submit}</span>
                     <span className="font-display text-[11px]">{sent ? "✓" : dir === "rtl" ? "←" : "↗"}</span>
                   </button>
-                  <span className={`text-[12px] ${sent ? "text-lime font-medium" : "text-white/40"}`}>
-                    {sent ? c.contact.thanks : c.contact.reply}
-                  </span>
+
+                  {/* Add Specifications Button (Opens Configurator Modal) */}
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center gap-2 border border-lime/50 bg-lime/[0.08] px-6 py-3.5 text-[13.5px] font-bold text-lime backdrop-blur-md transition-all duration-300 hover:border-lime hover:bg-lime hover:text-ink hover:shadow-[0_0_25px_rgba(223,255,0,0.4)] hover:-translate-y-0.5"
+                  >
+                    <span className="font-display text-sm leading-none">+</span>
+                    <span>{c.contact.addDetailsBtn}</span>
+                  </button>
+
+                  <div className="w-full sm:w-auto">
+                    <span className={`text-[12px] block ${sent ? "text-lime font-medium" : "text-white/40"}`}>
+                      {sent ? c.contact.thanks : c.contact.reply}
+                    </span>
+                  </div>
                 </div>
               </form>
             </Reveal>
@@ -147,6 +186,22 @@ export function Contact() {
           itemClassName="hover:text-lime transition-colors duration-300"
         />
       </div>
+
+      {/* Interactive 6-step Booth Configuration Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <BoothConfigModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            initialData={{
+              name,
+              reach,
+              details,
+            }}
+            onComplete={handleModalComplete}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
