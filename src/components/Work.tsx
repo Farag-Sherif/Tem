@@ -203,12 +203,6 @@ export function Work() {
           </motion.div>
         </div>
       </div>
-
-      <div className="mx-auto max-w-[1440px] px-5 pb-14 md:px-8">
-        <p className="text-[11.5px] leading-[1.9] text-white/35 border-t border-white/10 pt-5">
-          {c.work.note}
-        </p>
-      </div>
     </section>
   );
 }

@@ -25,13 +25,6 @@ export function Clients() {
             </Reveal>
           ))}
         </div>
-
-        <Reveal delay={0.1}>
-          <div className="mt-7 flex items-start gap-3 border-s-2 border-lime/40 bg-lime/[0.035] px-5 py-4">
-            <span className="mt-0.5 text-xs text-lime">✦</span>
-            <p className="body-copy text-[12.5px] text-white/60">{c.clients.note}</p>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
