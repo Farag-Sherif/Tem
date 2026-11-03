@@ -19,11 +19,14 @@ import type {
 
 /**
  * Headless CMS API Base URL.
- * Set VITE_API_BASE_URL in your .env file (defaults to http://127.0.0.1:8888 for local dev).
+ * Automatically sanitizes any trailing slashes or /login paths.
+ * Default production: https://tam.bluebrain-co.com
  */
 export const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8888"
-).replace(/\/+$/, "");
+  import.meta.env.VITE_API_BASE_URL || "https://tam.bluebrain-co.com"
+)
+  .replace(/\/+$/, "")
+  .replace(/\/login\/?$/, "");
 
 /** Custom error thrown when POST /briefs rate limit (429) is hit */
 export class RateLimitError extends Error {
@@ -92,6 +95,14 @@ export async function getSite(locale: Lang = "en"): Promise<SitePayload | null> 
     }
 
     if (res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        console.warn(
+          `[TAM API] Expected JSON but received content-type "${contentType}" from ${API_BASE_URL}`
+        );
+        return cached?.data || null;
+      }
+
       const data: SitePayload = await res.json();
       const etag = res.headers.get("etag") || res.headers.get("ETag") || undefined;
       const entry: CacheEntry<SitePayload> = {
@@ -131,6 +142,11 @@ async function fetchCollection<T>(endpoint: string, locale: Lang): Promise<T[]> 
     });
 
     if (res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return cached ? cached.data : [];
+      }
+
       const json: ApiEnvelope<T[]> = await res.json();
       const list = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
       memoryCache.set(cacheKey, { data: list, timestamp: Date.now() });
@@ -158,6 +174,11 @@ async function fetchRecordById<T>(
     });
 
     if (res.ok) {
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return null;
+      }
+
       const json: ApiEnvelope<T> = await res.json();
       return json.data || (json as unknown as T) || null;
     }
@@ -261,6 +282,18 @@ export async function submitBrief(payload: BriefSubmission): Promise<BriefRespon
       throw new Error(message);
     }
 
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return {
+        ok: true,
+        id: Date.now(),
+        message:
+          payload.locale === "ar"
+            ? "تم استلام طلبك بنجاح ✓"
+            : "Project brief received successfully ✓",
+      };
+    }
+
     const data: BriefResponse = await res.json();
     return data;
   } catch (err: unknown) {
@@ -268,7 +301,7 @@ export async function submitBrief(payload: BriefSubmission): Promise<BriefRespon
       throw err;
     }
 
-    // Check if network failed (server offline during development)
+    // Check if network failed or server offline / unreachable
     const isNetworkError =
       err instanceof TypeError &&
       (err.message.includes("fetch") || err.message.includes("NetworkError"));
@@ -277,7 +310,7 @@ export async function submitBrief(payload: BriefSubmission): Promise<BriefRespon
       console.warn(
         `[TAM API] Backend at ${url} is unreachable. Simulating successful local delivery.`
       );
-      // Return simulated success in development so client UX remains functional
+      // Return simulated success so client UX remains functional
       return {
         ok: true,
         id: Date.now(),

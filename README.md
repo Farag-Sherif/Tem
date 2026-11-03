@@ -179,9 +179,8 @@ The site is fully connected to the **TAM Public API v1** headless CMS. It consum
 ### Base URL Configuration
 Configured via `.env` / environment variable:
 ```bash
-VITE_API_BASE_URL=http://127.0.0.1:8888
+VITE_API_BASE_URL=https://tam.bluebrain-co.com
 ```
-*(Swap for your production domain when deploying to Vercel/production).*
 
 ### Connected Endpoints
 
