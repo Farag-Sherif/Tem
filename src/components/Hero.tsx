@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { Wordline } from "./ui/Reveal";
 import { useLang } from "../i18n/LangContext";
@@ -38,20 +38,43 @@ const PREVIEW_CARDS = [
 ];
 
 export function Hero() {
-  const { c, lang, dir } = useLang();
+  const { c, lang, dir, heroCards, heroSlides, news } = useLang();
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [activeCard, setActiveCard] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Auto transition between the 3 preview cards every 3.2 seconds (comfortable reading pace)
+  // Dynamic preview cards from API or fallback
+  const previewCards = useMemo(() => {
+    if (heroCards && heroCards.length > 0) {
+      return heroCards.map((card, idx) => ({
+        id: String(card.id ?? idx),
+        title: card.title,
+        tag: card.badge,
+        specs: card.subtitle,
+        img: card.image_url,
+      }));
+    }
+    return PREVIEW_CARDS.map((card) => ({
+      id: card.id,
+      title: lang === "ar" ? card.titleAr : card.titleEn,
+      tag: lang === "ar" ? card.tagAr : card.tagEn,
+      specs: lang === "ar" ? card.specsAr : card.specsEn,
+      img: card.img,
+    }));
+  }, [heroCards, lang]);
+
+  // Dynamic hero background slide from API or fallback
+  const activeSlide = heroSlides && heroSlides.length > 0 ? heroSlides[0] : null;
+
+  // Auto transition between preview cards every 3.2 seconds
   useEffect(() => {
-    if (reduce || isPaused) return;
+    if (reduce || isPaused || previewCards.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveCard((prev) => (prev + 1) % PREVIEW_CARDS.length);
+      setActiveCard((prev) => (prev + 1) % previewCards.length);
     }, 3200);
     return () => clearInterval(interval);
-  }, [reduce, isPaused]);
+  }, [reduce, isPaused, previewCards.length]);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "16%"]);
@@ -59,22 +82,30 @@ export function Hero() {
   const fade = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
   const yCopy = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
-  const currentPreview = PREVIEW_CARDS[activeCard];
+  const currentPreview = previewCards[activeCard % previewCards.length] || previewCards[0];
 
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden bg-ink pt-20">
-      {/* Background Video with depth tints */}
+      {/* Background Media with depth tints */}
       <motion.div className="absolute inset-0" style={reduce ? undefined : { y: yBg, scale: scaleBg }}>
-        <video
-          className="h-full w-full object-cover"
-          src="/media/film.mp4"
-          poster="/media/poster.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-        />
+        {activeSlide && activeSlide.type === "image" ? (
+          <img
+            src={activeSlide.media_url}
+            alt={activeSlide.caption || "Hero"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <video
+            className="h-full w-full object-cover"
+            src={activeSlide?.media_url || "/media/film.mp4"}
+            poster={activeSlide?.poster_url || "/media/poster.jpg"}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        )}
       </motion.div>
 
       {/* Layered brand gradients for atmosphere and text clarity */}
@@ -105,12 +136,27 @@ export function Hero() {
             </span>
           </div>
 
-          <div className="hidden items-center gap-2 text-white/40 md:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime/60" />
-            <span className="font-display text-[9.5px] tracking-[0.24em]">
-              BRAND v1.0 — EXHIBITIONS & MORE
-            </span>
-          </div>
+          {news && news.length > 0 ? (
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-lime/20 px-2.5 py-0.5 font-display text-[9px] text-lime font-bold">
+                NEWS
+              </span>
+              <a
+                href={news[0].link || "#contact"}
+                className="text-[11.5px] text-white/75 hover:text-lime transition-colors truncate max-w-[280px]"
+                title={news[0].excerpt}
+              >
+                {news[0].title}
+              </a>
+            </div>
+          ) : (
+            <div className="hidden items-center gap-2 text-white/40 md:flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-lime/60" />
+              <span className="font-display text-[9.5px] tracking-[0.24em]">
+                BRAND v1.0 — EXHIBITIONS & MORE
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Center Split: Headline & Interactive Showcase Card */}
@@ -194,11 +240,11 @@ export function Hero() {
             >
               {/* Image Preview Container with Pre-rendered Crossfade */}
               <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-indigo/30">
-                {PREVIEW_CARDS.map((card, idx) => (
+                {previewCards.map((card, idx) => (
                   <img
                     key={card.id}
                     src={card.img}
-                    alt={lang === "ar" ? card.titleAr : card.titleEn}
+                    alt={card.title}
                     className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-in-out ${
                       activeCard === idx
                         ? "opacity-100 scale-[1.04]"
@@ -212,7 +258,7 @@ export function Hero() {
                 {/* Floating pill badge */}
                 <div className="absolute top-3 start-3">
                   <span className="rounded-full border border-lime/40 bg-ink/80 px-3 py-1 text-[10.5px] font-semibold text-lime backdrop-blur-md transition-all">
-                    {lang === "ar" ? currentPreview.tagAr : currentPreview.tagEn}
+                    {currentPreview.tag}
                   </span>
                 </div>
 
@@ -222,17 +268,17 @@ export function Hero() {
                     {c.hero.cardBadge}
                   </div>
                   <h3 className="h-sub mt-1 text-[15px] font-bold text-white transition-all">
-                    {lang === "ar" ? currentPreview.titleAr : currentPreview.titleEn}
+                    {currentPreview.title}
                   </h3>
                   <div className="mt-1 text-[11.5px] text-white/60 transition-all">
-                    {lang === "ar" ? currentPreview.specsAr : currentPreview.specsEn}
+                    {currentPreview.specs}
                   </div>
                 </div>
               </div>
 
               {/* Quick interactive switcher tabs */}
               <div className="mt-3 grid grid-cols-3 gap-2" dir="ltr">
-                {PREVIEW_CARDS.map((card, idx) => {
+                {previewCards.map((card, idx) => {
                   const isActive = activeCard === idx;
                   return (
                     <button
@@ -248,10 +294,13 @@ export function Hero() {
                       }`}
                     >
                       {isActive && (
-                        <span className="absolute top-1 end-1 h-1.5 w-1.5 rounded-full bg-lime animate-pulse" />
+                        <motion.span
+                          layoutId="cardActiveBar"
+                          className="absolute inset-0 border border-lime bg-lime/10"
+                        />
                       )}
-                      <span className="truncate">
-                        {lang === "ar" ? card.tagAr : card.tagEn}
+                      <span className="relative z-10 truncate font-display tracking-wider">
+                        {String(idx + 1).padStart(2, "0")} · {card.tag}
                       </span>
                     </button>
                   );
@@ -261,30 +310,28 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Bottom Hero Facts Ribbon */}
-        <div className="border-t border-white/12 pt-5">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 md:items-center">
+        {/* Bottom Verification Facts Strip */}
+        <div className="border-t border-white/10 pt-6">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
             {c.hero.facts.map(([num, label]) => (
-              <div key={label} className="flex items-baseline gap-2.5 border-s-2 border-lime/40 ps-3">
-                <span className="font-display text-[22px] md:text-[26px] font-bold text-lime leading-none">
+              <div key={label} className="border-s border-lime/40 ps-4">
+                <div className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white">
                   {num}
-                </span>
-                <span className="text-[12px] md:text-[13px] text-white/60 font-medium">
-                  {label}
-                </span>
+                </div>
+                <div className="kicker mt-1 text-[11px] text-white/50">{label}</div>
               </div>
             ))}
           </div>
         </div>
       </motion.div>
 
-      {/* Hero Bottom Seamless Infinite Marquee Transition */}
-      <div className="relative border-y border-white/10 bg-ink/90 py-3.5 backdrop-blur-md">
+      {/* Infinite Bottom Marquee */}
+      <div className="relative border-t border-white/10 bg-ink/90 py-3 backdrop-blur-md">
         <Marquee
           items={c.hero.ticker}
-          speed={32}
-          className="text-white/35 font-display text-[10px] tracking-[0.24em]"
-          itemClassName="hover:text-lime transition-colors"
+          speed={28}
+          className="text-white/35 font-display text-[10.5px] tracking-[0.24em]"
+          itemClassName="hover:text-lime transition-colors duration-300"
         />
       </div>
     </section>

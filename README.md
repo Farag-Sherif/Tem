@@ -27,6 +27,7 @@
   - [Bilingual Localization Engine (EN / AR)](#7-bilingual-localization-engine-en--ar)
   - [Inertial Smooth Momentum Scroll](#8-inertial-smooth-momentum-scroll)
 - [Design System & Visual Language](#-design-system--visual-language)
+- [Headless CMS API Integration (Public API v1)](#-headless-cms-api-integration-public-api-v1)
 - [Tech Stack](#-tech-stack)
 - [Project Architecture](#-project-architecture)
 - [Getting Started](#-getting-started)
@@ -171,6 +172,43 @@ Guided by **TAM Brand Guidelines v1.0 — Built Piece by Piece**:
 
 ---
 
+## ⚡ Headless CMS API Integration (Public API v1)
+
+The site is fully connected to the **TAM Public API v1** headless CMS. It consumes live dynamic content and transmits client briefs with bot-protection and rate-limiting safeguards.
+
+### Base URL Configuration
+Configured via `.env` / environment variable:
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:8888
+```
+*(Swap for your production domain when deploying to Vercel/production).*
+
+### Connected Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/site?locale=en\|ar` | **Full SPA payload in one call** (Hero, News, Glance, Journey, Services, Work, Standards, Clients, Contact, Brand, Footer). Supports `ETag` and `If-None-Match` for instant `304 Not Modified` cached responses. |
+| `POST` | `/api/v1/briefs` | **Project brief & booth planner submission**. Accepts `name`, `contact`, `details`, `locale`, `website` (honeypot), and structured `specification`. Returns `201 Created` or `429` when rate-limited. |
+| `GET` | `/api/v1/hero-slides?locale=...` | Active hero background media (`video` / `image`, `media_url`, `poster_url`, `caption`). |
+| `GET` | `/api/v1/hero-cards?locale=...` | Active showcase preview cards (`image_url`, `badge`, `title`, `subtitle`). |
+| `GET` | `/api/v1/hero-stats?locale=...` | Active metric statistics (`number`, `label`). |
+| `GET` | `/api/v1/news?locale=...` | Active studio news (`date`, `title`, `excerpt`, `link`). |
+| `GET` | `/api/v1/journey?locale=...` | Published stages with step ordering, descriptions, and tags (`[{ name }]`). |
+| `GET` | `/api/v1/tags?locale=...` | Tag taxonomy list. |
+| `GET` | `/api/v1/glance?locale=...` | Key value propositions (`number`, `title`, `description`). |
+| `GET` | `/api/v1/standards?locale=...` | Manufacturing standards (`number`, `title`, `description`). |
+| `GET` | `/api/v1/projects?locale=...` | Portfolio projects (`slug`, `kicker`, `title`, `category`, `description`, `image_url`). |
+| `GET` | `/api/v1/services?locale=...` | Architectural capabilities (`title`, `tags`, `summary`, `description`). |
+| `GET` | `/api/v1/clients?locale=...` | Partner network with logos and external links (`name`, `logo_url`, `website`). |
+
+### Architectural Safeguards & Features
+- **ETag & 5-Minute In-Memory Caching:** Automatically manages `If-None-Match` headers for low-latency revalidation.
+- **Bot Honeypot Protection:** An invisible `website` field silently swallows spam submissions without polluting lead data.
+- **Rate-Limit Guard (`429`):** Intercepts throttled requests and presents localized, friendly countdown alerts.
+- **Offline / Server-Down Resilience:** If the backend API server is temporarily offline, the site gracefully operates on its rich built-in copy without flashing blank states or throwing uncaught exceptions.
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Framework:** [React 19.3](https://react.dev/) + [React DOM 19.3](https://react.dev/)
@@ -192,6 +230,9 @@ tam-site/
 │   ├── fonts/                  # Syncopate, Poppins, IBM Plex Sans Arabic
 │   └── media/work/             # High-res exhibition booth photographs
 ├── src/
+│   ├── api/                    # Headless CMS API client & type contracts
+│   │   ├── client.ts           # ETag cached fetch client & brief submission
+│   │   └── types.ts            # TypeScript interfaces for envelopes & models
 │   ├── components/             # React feature sections & configurator
 │   │   ├── ui/                 # Reusable atomic UI components
 │   │   │   ├── Marquee.tsx     # Hardware-accelerated infinite ticker

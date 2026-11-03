@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useLang } from "../i18n/LangContext";
+import { submitBrief, RateLimitError } from "../api/client";
 
 const BRAND_PALETTE = [
   { name: "Blue", hex: "#2563EB" },
@@ -51,10 +52,13 @@ export function BoothConfigModal({
   initialData,
   onComplete,
 }: BoothConfigModalProps) {
-  const { c, dir } = useLang();
+  const { c, dir, lang } = useLang();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiSuccessMsg, setApiSuccessMsg] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
 
   // Step 1: Dimensions
   const [width, setWidth] = useState(6);
@@ -183,33 +187,80 @@ export function BoothConfigModal({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isCurrentStepValid) return;
 
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      setSubmitted(true);
-      if (onComplete) {
-        onComplete({
+    setApiError(null);
+
+    const configData: ConfiguratorData = {
+      width,
+      depth,
+      height,
+      boothType,
+      selectedStyles,
+      selectedColors,
+      selectedFeatures,
+      industry,
+      name,
+      phone,
+      company,
+      budget,
+      notes,
+      logoFileName,
+    };
+
+    try {
+      const res = await submitBrief({
+        name,
+        contact: phone,
+        details:
+          notes ||
+          `${width}x${depth}m (${height}m H) ${boothType.toUpperCase()} stand — ${industry || "Exhibition"}`,
+        locale: lang,
+        website: honeypot,
+        specification: {
           width,
           depth,
           height,
-          boothType,
-          selectedStyles,
-          selectedColors,
-          selectedFeatures,
+          booth_type: boothType,
           industry,
-          name,
-          phone,
-          company,
+          styles: selectedStyles,
+          colors: selectedColors,
+          features: selectedFeatures,
           budget,
+          company,
           notes,
-          logoFileName,
-        });
+        },
+      });
+
+      if (res.message) {
+        setApiSuccessMsg(res.message);
       }
-    }, 900);
+      setSubmitted(true);
+      if (onComplete) {
+        onComplete(configData);
+      }
+    } catch (err: unknown) {
+      if (err instanceof RateLimitError) {
+        setApiError(
+          lang === "ar"
+            ? "تم تجاوز معدل الإرسال المسموح (خطأ 429). يرجى الانتظار قليلاً قبل المحاولة مجدداً."
+            : "Rate limit exceeded (429). Please wait a moment before trying again."
+        );
+      } else {
+        setApiError(
+          err instanceof Error
+            ? err.message
+            : lang === "ar"
+            ? "تعذر إرسال المواصفات إلى الخادم."
+            : "Failed to submit specifications to the API server."
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -363,7 +414,7 @@ export function BoothConfigModal({
                     {c.configurator.step6.successTitle}
                   </h3>
                   <p className="body-copy mt-3 max-w-xl mx-auto text-white/70 text-[14px]">
-                    {c.configurator.step6.successLead}
+                    {apiSuccessMsg || c.configurator.step6.successLead}
                   </p>
 
                   <div className="mt-7 border border-white/10 bg-white/[0.02] p-5 max-w-lg mx-auto text-start">
@@ -1102,13 +1153,30 @@ export function BoothConfigModal({
                 <div />
               )}
 
-              {/* Validation Warning Alert in center */}
-              {!isCurrentStepValid && (
+              {/* Validation / API Error Alert in center */}
+              {apiError ? (
+                <div className="flex items-center gap-1.5 text-[11px] text-red-300 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-sm">
+                  <span>⚠️</span>
+                  <span>{apiError}</span>
+                </div>
+              ) : !isCurrentStepValid ? (
                 <div className="flex items-center gap-1.5 text-[11px] text-amber-300 bg-amber-400/10 border border-amber-400/30 px-3 py-1.5 rounded-sm">
                   <span>⚠️</span>
                   <span>{currentStepWarning || c.contact.stepRequiredWarning}</span>
                 </div>
-              )}
+              ) : null}
+
+              {/* Bot Honeypot Input */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ display: "none" }}
+                aria-hidden="true"
+              />
 
               {/* Next / Submit Button */}
               {step < 6 ? (

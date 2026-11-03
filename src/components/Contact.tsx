@@ -5,24 +5,68 @@ import { Reveal } from "./ui/Reveal";
 import { Symbol } from "./ui/Symbol";
 import { Marquee } from "./ui/Marquee";
 import { BoothConfigModal, type ConfiguratorData } from "./BoothConfigModal";
+import { submitBrief, RateLimitError } from "../api/client";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 export function Contact() {
-  const { c, dir } = useLang();
+  const { c, dir, lang } = useLang();
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [apiFeedback, setApiFeedback] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Controlled form state for pre-filling into modal
+  // Controlled form state for pre-filling into modal & API submission
   const [name, setName] = useState("");
   const [reach, setReach] = useState("");
   const [details, setDetails] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // Bot-protection honeypot (website)
 
   const handleModalComplete = (data: ConfiguratorData) => {
     setSent(true);
     if (data.name) setName(data.name);
     if (data.phone) setReach(data.phone);
     if (data.notes) setDetails(data.notes);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await submitBrief({
+        name,
+        contact: reach,
+        details,
+        locale: lang,
+        website: honeypot,
+      });
+
+      setSent(true);
+      if (res.message) {
+        setApiFeedback(res.message);
+      }
+    } catch (err: unknown) {
+      if (err instanceof RateLimitError) {
+        setErrorMessage(
+          lang === "ar"
+            ? "تم إرسال عدة طلبات مؤخراً. يرجى الانتظار قليلاً قبل المحاولة مجدداً (خطأ 429)."
+            : "Too many requests. Please wait a moment before trying again (429 Rate Limit)."
+        );
+      } else {
+        setErrorMessage(
+          err instanceof Error
+            ? err.message
+            : lang === "ar"
+            ? "تعذر إرسال الطلب. يرجى المحاولة مرة أخرى."
+            : "Submission failed. Please try again."
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,13 +100,19 @@ export function Contact() {
             </Reveal>
 
             <Reveal delay={0.18}>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSent(true);
-                }}
-                className="mt-9 grid gap-5 sm:grid-cols-2"
-              >
+              <form onSubmit={handleFormSubmit} className="mt-9 grid gap-5 sm:grid-cols-2">
+                {/* Honeypot field for bot protection as specified in API spec */}
+                <input
+                  type="text"
+                  name="website"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  style={{ display: "none" }}
+                  aria-hidden="true"
+                />
+
                 <label className="block">
                   <span className="kicker text-[11px] text-white/50">{c.contact.name}</span>
                   <input
@@ -89,6 +139,7 @@ export function Contact() {
                   <span className="kicker text-[11px] text-white/50">{c.contact.details}</span>
                   <textarea
                     rows={3}
+                    required
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}
                     placeholder={c.contact.detailsPh}
@@ -96,14 +147,31 @@ export function Contact() {
                   />
                 </label>
 
+                {errorMessage && (
+                  <div className="sm:col-span-2 border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-xs text-amber-200">
+                    ⚠️ {errorMessage}
+                  </div>
+                )}
+
                 <div className="mt-4 flex flex-wrap items-center gap-4 sm:col-span-2">
                   {/* Primary Quick Submit Button */}
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2.5 bg-lime px-7 py-3.5 text-[13.5px] font-bold text-ink shadow-[0_0_20px_-5px_rgba(223,255,0,0.35)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(223,255,0,0.5)] hover:-translate-y-0.5"
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2.5 bg-lime px-7 py-3.5 text-[13.5px] font-bold text-ink shadow-[0_0_20px_-5px_rgba(223,255,0,0.35)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(223,255,0,0.5)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <span>{sent ? c.contact.sent : c.contact.submit}</span>
-                    <span className="font-display text-[11px]">{sent ? "✓" : dir === "rtl" ? "←" : "↗"}</span>
+                    <span>
+                      {submitting
+                        ? lang === "ar"
+                          ? "جاري الإرسال..."
+                          : "Sending..."
+                        : sent
+                        ? c.contact.sent
+                        : c.contact.submit}
+                    </span>
+                    <span className="font-display text-[11px]">
+                      {sent ? "✓" : dir === "rtl" ? "←" : "↗"}
+                    </span>
                   </button>
 
                   {/* Add Specifications Button (Opens Configurator Modal) */}
@@ -117,8 +185,12 @@ export function Contact() {
                   </button>
 
                   <div className="w-full sm:w-auto">
-                    <span className={`text-[12px] block ${sent ? "text-lime font-medium" : "text-white/40"}`}>
-                      {sent ? c.contact.thanks : c.contact.reply}
+                    <span
+                      className={`text-[12px] block ${
+                        sent ? "text-lime font-medium" : "text-white/40"
+                      }`}
+                    >
+                      {sent ? apiFeedback || c.contact.thanks : c.contact.reply}
                     </span>
                   </div>
                 </div>
@@ -140,7 +212,10 @@ export function Contact() {
               <div className="mt-7 h-px w-full bg-white/12" />
               <div className="mt-6 space-y-4">
                 {c.contact.rows.map(([k, v]) => (
-                  <div key={k} className="flex items-start justify-between gap-5 border-b border-white/5 pb-3">
+                  <div
+                    key={k}
+                    className="flex items-start justify-between gap-5 border-b border-white/5 pb-3"
+                  >
                     <span className="shrink-0 text-[11px] font-medium text-white/40">{k}</span>
                     <span className="text-end text-[12.5px] leading-relaxed text-white/85">{v}</span>
                   </div>
@@ -177,7 +252,7 @@ export function Contact() {
         </div>
       </div>
 
-      {/* Rock-solid, continuous, infinite footer ticker that never disappears */}
+      {/* Infinite marquee ticker */}
       <div className="relative border-t border-white/10 bg-ink/95 py-3.5">
         <Marquee
           items={c.hero.ticker}
