@@ -43,34 +43,38 @@ export function Glance() {
 
         {/* 5-Stage Lifecycle Bar from Page 5 */}
         <Reveal delay={0.15}>
-          <div className="mt-10 border border-white/12 bg-white/[0.02] p-5 md:p-7">
-            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-              <span className="kicker text-[11px] text-lime font-bold tracking-wider">
+          <div className="mt-10 border border-white/12 bg-white/[0.02] p-4 sm:p-5 md:p-7">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3.5">
+              <span className="kicker text-[10px] sm:text-[11px] text-lime font-bold tracking-wider">
                 {glance.lifecycleTitle}
               </span>
-              <span className="font-display text-[9.5px] tracking-[0.2em] text-white/40">
+              <span className="font-display text-[9px] sm:text-[9.5px] tracking-[0.2em] text-white/40">
                 100% IN-HOUSE TIMELINE
               </span>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
               {glance.lifecycle.map((lc, idx) => (
                 <div
                   key={lc.name}
-                  className="relative border border-white/10 bg-ink/60 p-4 transition-colors hover:border-lime/40"
+                  className={`relative overflow-hidden border border-white/10 bg-ink/60 p-3 sm:p-4 transition-colors hover:border-lime/40 ${
+                    idx === 4 ? "col-span-2 sm:col-span-1" : ""
+                  }`}
                 >
                   <div className="flex items-center justify-between text-white/40">
-                    <span className="font-display text-xs text-lime font-bold">{lc.n}</span>
+                    <span className="font-display text-[11px] text-lime font-bold">{lc.n}</span>
                     {idx < glance.lifecycle.length - 1 && (
-                      <span className="text-[11px] hidden sm:inline text-white/30">
+                      <span className="text-[11px] hidden lg:inline text-white/30">
                         {dir === "rtl" ? "←" : "→"}
                       </span>
                     )}
                   </div>
-                  <div className="mt-3 font-display text-[14px] md:text-[15px] font-bold text-white">
+                  <div className="mt-2.5 font-display text-[11px] sm:text-[12.5px] md:text-[14px] font-bold text-white tracking-tight sm:tracking-normal truncate">
                     {lc.name}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-white/50">{lc.sub}</div>
+                  <div className="mt-1 text-[10px] sm:text-[11px] text-white/50 truncate">
+                    {lc.sub}
+                  </div>
                 </div>
               ))}
             </div>
