@@ -3,8 +3,10 @@ import { Loader } from "./components/Loader";
 import { Nav } from "./components/Nav";
 import { Hero } from "./components/Hero";
 import { Glance } from "./components/Glance";
-import { Journey } from "./components/Journey";
+import { About } from "./components/About";
 import { Services } from "./components/Services";
+import { Journey } from "./components/Journey";
+import { WorkshopCrew } from "./components/WorkshopCrew";
 import { Work } from "./components/Work";
 import { Standards } from "./components/Standards";
 import { Clients } from "./components/Clients";
@@ -31,8 +33,10 @@ function Site() {
       <main>
         <Hero />
         <Glance />
-        <Journey />
+        <About />
         <Services />
+        <Journey />
+        <WorkshopCrew />
         <Work />
         <Standards />
         <Clients />

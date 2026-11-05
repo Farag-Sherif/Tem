@@ -4,7 +4,8 @@ import { SectionHead } from "./ui/SectionHead";
 
 export function Services() {
   const { c, dir } = useLang();
-  const items = c.services.items;
+  const stages = c.services.stages || c.services.items;
+  const andMore = c.services.andMoreItems;
 
   return (
     <section id="services" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
@@ -31,10 +32,10 @@ export function Services() {
           </a>
         </div>
 
-        {/* Bento Grid */}
+        {/* 5 Core Stages Bento Grid */}
         <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {items.map((s, i) => {
-            const featured = "big" in s && s.big;
+          {stages.map((s, i) => {
+            const featured = "big" in s && Boolean(s.big);
             const img = "img" in s ? (s.img as string | undefined) : undefined;
             return (
               <motion.article
@@ -53,7 +54,7 @@ export function Services() {
                       src={img}
                       alt={s.t}
                       loading="lazy"
-                      className="h-full w-full object-cover opacity-40 transition-all duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:opacity-55"
+                      className="h-full w-full object-cover opacity-35 transition-all duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:opacity-55"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
                   </div>
@@ -62,7 +63,7 @@ export function Services() {
                 <div className="relative z-10 flex h-full flex-col p-6 md:p-8">
                   <div className="flex items-start justify-between gap-4">
                     <span className="font-display text-[11px] tracking-[0.24em] font-bold text-lime">
-                      {s.n}
+                      STAGE {s.n}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {s.tags.map((tag) => (
@@ -78,7 +79,7 @@ export function Services() {
 
                   <h3
                     className={`mt-auto pt-10 text-white group-hover:text-lime transition-colors duration-300 ${
-                      featured ? "h-title text-[24px] md:text-[28px]" : "h-sub text-[18px]"
+                      featured ? "h-title text-[22px] md:text-[26px]" : "h-sub text-[18px]"
                     }`}
                   >
                     {s.t}
@@ -92,7 +93,7 @@ export function Services() {
                   </p>
 
                   <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-                    <span className="kicker text-[10px] text-white/40">0{i + 1} / 06</span>
+                    <span className="kicker text-[10px] text-white/40">0{i + 1} / 05</span>
                     <span
                       className={`font-display text-[12px] text-white/30 transition-all duration-300 group-hover:text-lime ${
                         dir === "rtl" ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"
@@ -106,6 +107,45 @@ export function Services() {
             );
           })}
         </div>
+
+        {/* Page 8: & MORE Display Solutions Section */}
+        {andMore && andMore.length > 0 && (
+          <div className="mt-16 border-t border-white/10 pt-14">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+              <div>
+                <span className="kicker text-lime font-bold text-[11px] tracking-wider">
+                  & MORE DISPLAY SOLUTIONS · حلول العرض الإضافية
+                </span>
+                <h3 className="h-title mt-2 text-white text-[22px] md:text-[26px]">
+                  {c.services.andMoreTitle}
+                </h3>
+              </div>
+              <p className="body-copy text-white/60 text-[13.5px] max-w-[44ch]">
+                {c.services.andMoreLead}
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {andMore.map((item, idx) => (
+                <div
+                  key={item.title}
+                  className="group relative border border-white/10 bg-white/[0.02] p-6 transition-all duration-300 hover:border-lime/40 hover:bg-white/[0.04]"
+                >
+                  <div className="flex items-center justify-between text-lime">
+                    <span className="font-display text-lg">{item.icon}</span>
+                    <span className="font-display text-[9.5px] text-white/30">0{idx + 1}</span>
+                  </div>
+                  <h4 className="mt-4 text-[15px] font-bold text-white group-hover:text-lime transition-colors">
+                    {item.title}
+                  </h4>
+                  <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

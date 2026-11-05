@@ -211,15 +211,66 @@ export function Contact() {
               />
               <div className="mt-7 h-px w-full bg-white/12" />
               <div className="mt-6 space-y-4">
-                {c.contact.rows.map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="flex items-start justify-between gap-5 border-b border-white/5 pb-3"
-                  >
-                    <span className="shrink-0 text-[11px] font-medium text-white/40">{k}</span>
-                    <span className="text-end text-[12.5px] leading-relaxed text-white/85">{v}</span>
-                  </div>
-                ))}
+                {c.contact.rows.map(([k, v]) => {
+                  let valNode: React.ReactNode = v;
+                  if (k.includes("Phone") || k.includes("الهاتف") || k.includes("واتساب")) {
+                    valNode = (
+                      <a
+                        href="https://wa.me/201011116346"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-lime hover:underline font-mono text-[13px]"
+                      >
+                        {v}
+                      </a>
+                    );
+                  } else if (k.includes("Email") || k.includes("البريد")) {
+                    valNode = (
+                      <a
+                        href="mailto:inof@bluebrain-co.com"
+                        className="text-lime hover:underline text-[12.5px]"
+                      >
+                        {v}
+                      </a>
+                    );
+                  } else if (k.includes("Website") || k.includes("الموقع")) {
+                    valNode = (
+                      <a
+                        href="https://www.bluebrain-co.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-lime hover:underline text-[12.5px]"
+                      >
+                        {v}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={k}
+                      className="flex items-start justify-between gap-5 border-b border-white/5 pb-3"
+                    >
+                      <span className="shrink-0 text-[11px] font-medium text-white/40">{k}</span>
+                      <span className="text-end text-[12.5px] leading-relaxed text-white/85">
+                        {valNode}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Direct WhatsApp Instant Action Button */}
+              <div className="mt-6">
+                <a
+                  href="https://wa.me/201011116346"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center justify-center gap-2.5 border border-lime/40 bg-lime/10 px-4 py-3 text-xs font-bold text-lime transition-all hover:border-lime hover:bg-lime hover:text-ink"
+                >
+                  <span className="text-sm">💬</span>
+                  <span>{lang === "ar" ? "محادثة فورية عبر واتساب (+20 010 1111 63 46)" : "Instant Chat on WhatsApp (+20 010 1111 63 46)"}</span>
+                </a>
               </div>
 
               <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-4">

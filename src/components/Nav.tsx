@@ -17,8 +17,10 @@ export function Nav() {
   }, []);
 
   const items = [
-    ["#journey", c.nav.journey],
+    ["#about", c.nav.about],
     ["#services", c.nav.services],
+    ["#journey", c.nav.journey],
+    ["#workshop", c.nav.workshop],
     ["#work", c.nav.work],
     ["#standards", c.nav.standards],
     ["#clients", c.nav.clients],

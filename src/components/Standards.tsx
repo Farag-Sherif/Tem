@@ -17,7 +17,7 @@ export function Standards() {
     <section id="standards" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
-          index="0.4"
+          index="0.7"
           kicker={c.standards.kicker}
           title={c.standards.title}
           lead={c.standards.lead}

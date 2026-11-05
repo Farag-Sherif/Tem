@@ -109,7 +109,7 @@ export function Journey() {
     <section id="journey" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
-          index="0.1"
+          index="0.3"
           kicker={c.journey.kicker}
           title={c.journey.title}
           lead={c.journey.lead}
@@ -164,7 +164,7 @@ export function Journey() {
               <div className="mt-12 flex flex-col items-start justify-between gap-5 border border-lime/30 bg-lime/[0.04] p-7 md:flex-row md:items-center md:p-9 shadow-[0_0_35px_-10px_rgba(223,255,0,0.1)]">
                 <div>
                   <div className="font-display text-[10.5px] tracking-[0.26em] text-lime font-bold">
-                    {c.journey.stages[5].n} {dir === "rtl" ? "↺ 01" : "→ 01"}
+                    {stages[stages.length - 1]?.n || "05"} {dir === "rtl" ? "↺ 01" : "→ 01"}
                   </div>
                   <h3 className="h-sub mt-3 text-white text-[19px]">{c.work.endTitle}</h3>
                   <p className="body-copy mt-2 text-[13.5px] text-white/60">{c.work.endSub}</p>

@@ -1,208 +1,228 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { useLang } from "../i18n/LangContext";
 import { SectionHead } from "./ui/SectionHead";
 
+type ProjectCategory = "all" | "booths" | "displays" | "concepts" | "prints";
+
 export function Work() {
-  const { c, dir } = useLang();
-  const items = c.work.items;
-  const wrap = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLDivElement>(null);
-  const [distance, setDistance] = useState(0);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const reduce = useReducedMotion();
+  const { c, dir, lang } = useLang();
+  const [activeTab, setActiveTab] = useState<ProjectCategory>("all");
+  const [selectedProject, setSelectedProject] = useState<typeof c.work.items[0] | null>(null);
 
-  // Measure track scroll distance
-  const measure = useCallback(() => {
-    if (!track.current) return;
-    // Padding buffer to ensure the last card docks comfortably inside the viewport
-    const totalW = track.current.scrollWidth;
-    const winW = window.innerWidth;
-    const padding = winW < 768 ? 32 : 64;
-    const d = totalW - winW + padding;
-    setDistance(Math.max(0, d));
-  }, []);
+  const tabs: { id: ProjectCategory; label: string }[] = [
+    { id: "all", label: c.work.allTab || (lang === "ar" ? "كل الأعمال" : "All Projects") },
+    { id: "booths", label: c.work.boothsTab || (lang === "ar" ? "أجنحة المعارض" : "Exhibition Booths") },
+    { id: "displays", label: c.work.displaysTab || (lang === "ar" ? "استندات العرض" : "Display Units") },
+    { id: "concepts", label: c.work.conceptsTab || (lang === "ar" ? "مفاهيم 3D" : "3D Concepts") },
+    { id: "prints", label: c.work.printsTab || (lang === "ar" ? "المطبوعات" : "Prints") },
+  ];
 
-  useEffect(() => {
-    measure();
-    window.addEventListener("resize", measure);
-    const t = window.setTimeout(measure, 500);
-    const t2 = window.setTimeout(measure, 1200);
-    return () => {
-      window.removeEventListener("resize", measure);
-      window.clearTimeout(t);
-      window.clearTimeout(t2);
-    };
-  }, [c, measure]);
-
-  const { scrollYProgress } = useScroll({ target: wrap, offset: ["start start", "end end"] });
-
-  // In RTL, the track starts aligned to the right edge. To reveal items extending
-  // to the left, we translate positively (+distance) towards the right.
-  // In LTR, the track starts aligned to the left edge. To reveal items extending
-  // to the right, we translate negatively (-distance) towards the left.
-  const xRtl = useTransform(scrollYProgress, [0, 1], [0, distance]);
-  const xLtr = useTransform(scrollYProgress, [0, 1], [0, -distance]);
-  const x = dir === "rtl" ? xRtl : xLtr;
-
-  // Track active project index based on scroll progress
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      const idx = Math.min(items.length - 1, Math.floor(latest * (items.length + 0.5)));
-      setActiveIndex(Math.max(0, idx));
-    });
-    return () => unsubscribe();
-  }, [scrollYProgress, items.length]);
-
-  // Scroll to a specific card when clicking arrow buttons
-  const scrollToCard = (targetIdx: number) => {
-    if (!wrap.current) return;
-    const rect = wrap.current.getBoundingClientRect();
-    const scrollTop = window.scrollY + rect.top;
-    const scrollHeight = wrap.current.offsetHeight - window.innerHeight;
-    const targetProgress = targetIdx / items.length;
-    window.scrollTo({
-      top: scrollTop + scrollHeight * targetProgress,
-      behavior: "smooth",
-    });
-  };
-
-  const handlePrev = () => {
-    scrollToCard(Math.max(0, activeIndex - 1));
-  };
-
-  const handleNext = () => {
-    scrollToCard(Math.min(items.length, activeIndex + 1));
-  };
+  const filteredItems = useMemo(() => {
+    if (activeTab === "all") return c.work.items;
+    return c.work.items.filter((item) => ("category" in item ? item.category === activeTab : true));
+  }, [c.work.items, activeTab]);
 
   return (
-    <section id="work" className="relative border-t border-white/10 bg-ink">
-      <div className="mx-auto max-w-[1440px] px-5 pt-20 md:px-8 md:pt-28">
+    <section id="work" className="relative border-t border-white/10 bg-ink py-20 md:py-28">
+      <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <SectionHead index="0.3" kicker={c.work.kicker} title={c.work.title} lead={c.work.lead} />
+          <SectionHead
+            index="0.3"
+            kicker={c.work.kicker}
+            title={c.work.title}
+            lead={c.work.lead}
+          />
 
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Active index counter */}
-            <div className="flex items-center gap-2 border border-white/15 px-3 py-1.5 text-xs text-white/70">
-              <span className="font-display text-lime font-bold">
-                {String(activeIndex + 1).padStart(2, "0")}
-              </span>
-              <span className="text-white/30">/</span>
-              <span className="text-white/40">{String(items.length).padStart(2, "0")}</span>
-            </div>
-
-            {/* Prev / Next controls */}
-            <div className="flex items-center gap-1.5" dir="ltr">
-              <button
-                type="button"
-                onClick={dir === "rtl" ? handleNext : handlePrev}
-                aria-label="Previous project"
-                className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/70 transition-colors hover:border-lime hover:text-lime"
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                onClick={dir === "rtl" ? handlePrev : handleNext}
-                aria-label="Next project"
-                className="flex h-9 w-9 items-center justify-center border border-white/20 text-white/70 transition-colors hover:border-lime hover:text-lime"
-              >
-                →
-              </button>
-            </div>
-
-            <div className="hidden items-center gap-3 text-white/35 lg:flex">
-              <span className="kicker text-[10px] text-white/50">{c.work.hint}</span>
-              <span className="h-px w-10 bg-white/25" />
-            </div>
+          {/* Category Filter Tabs */}
+          <div className="flex flex-wrap items-center gap-1.5 border border-white/10 bg-white/[0.02] p-1.5" dir={dir}>
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative px-3.5 py-1.5 text-xs font-medium transition-all duration-300 ${
+                    isActive
+                      ? "bg-lime text-ink font-bold shadow-[0_0_15px_-3px_rgba(223,255,0,0.4)]"
+                      : "text-white/60 hover:text-white hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
 
-      {/* Sticky horizontal track container */}
-      <div
-        ref={wrap}
-        className="relative mt-10"
-        style={{ height: `${Math.max(1, items.length + 1) * 65}vh` }}
-      >
-        <div
+        {/* Responsive, Balanced Grid that displays perfectly in both Arabic and English */}
+        <motion.div
+          layout
+          className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           dir={dir}
-          className="sticky top-0 flex h-[100svh] items-center overflow-hidden"
         >
-          <motion.div
-            ref={track}
-            dir={dir}
-            className="flex gap-5 px-5 md:gap-7 md:px-8 shrink-0 items-center"
-            style={reduce ? undefined : { x }}
-          >
-            {items.map((w, i) => (
-              <figure
-                key={w.title + i}
-                className="group relative w-[min(84vw,620px)] shrink-0 overflow-hidden border border-white/12 bg-white/[0.02] transition-colors duration-500 hover:border-lime/40"
+          <AnimatePresence mode="popLayout">
+            {filteredItems.map((w, idx) => (
+              <motion.article
+                layout
+                key={w.title + idx}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.45, delay: (idx % 6) * 0.04 }}
+                className="group relative cursor-pointer overflow-hidden border border-white/12 bg-white/[0.02] transition-all duration-500 hover:border-lime/50 hover:bg-white/[0.04] hover:-translate-y-1"
+                onClick={() => setSelectedProject(w)}
               >
-                <div className="relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden">
+                {/* Image Container */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-indigo/20">
                   <img
                     src={w.img}
                     alt={w.title}
-                    loading={i < 2 ? "eager" : "lazy"}
-                    className="h-full w-full scale-[1.02] object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.07]"
+                    loading={idx < 4 ? "eager" : "lazy"}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  {/* Subtle dark gradient overlay for text readability */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent opacity-80" />
 
-                  {/* Top floating pill */}
-                  <div className="absolute top-4 start-4 flex items-center gap-2">
-                    <span className="border border-white/20 bg-ink/70 px-2.5 py-1 text-[10px] tracking-wide text-white/80 backdrop-blur-md">
+                  {/* Category Pill Tag */}
+                  <div className="absolute top-3.5 start-3.5 flex items-center gap-2">
+                    <span className="border border-white/20 bg-ink/80 px-2.5 py-0.5 text-[10.5px] font-medium text-white/90 backdrop-blur-md">
                       {w.tag}
                     </span>
                   </div>
 
-                  {/* Bottom caption bar */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-5 md:p-6 bg-gradient-to-t from-ink via-ink/80 to-transparent">
-                    <div className="flex items-center gap-2">
-                      <span className="font-display text-[10.5px] font-bold text-lime">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="text-[10px] text-white/30">/</span>
-                      <span className="text-[10px] text-white/40">
-                        {String(items.length).padStart(2, "0")}
-                      </span>
-                    </div>
-
-                    <h3 className="h-sub mt-2 text-[16px] md:text-[18px] text-white group-hover:text-lime transition-colors duration-300">
-                      {w.title}
-                    </h3>
-                    <div className="mt-1 text-[12px] text-white/60">{w.meta}</div>
+                  {/* Index Pill */}
+                  <div className="absolute top-3.5 end-3.5 flex items-center gap-1 font-display text-[10px] text-lime font-bold bg-ink/80 px-2 py-0.5 border border-white/10 backdrop-blur-md">
+                    {String(idx + 1).padStart(2, "0")}
                   </div>
                 </div>
-              </figure>
-            ))}
 
-            {/* End CTA Card */}
-            <a
-              href="#contact"
-              className="group flex w-[min(84vw,560px)] shrink-0 flex-col items-center justify-center border border-lime/40 bg-lime/[0.04] p-8 md:p-12 text-center transition-all duration-300 hover:border-lime hover:bg-lime/[0.08]"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-lime/50 text-lime mb-5 group-hover:scale-110 transition-transform">
-                <span className="text-xl">↗</span>
-              </div>
-              <div className="font-display text-[10.5px] tracking-[0.24em] text-lime font-bold">
-                {c.work.nextLabel}
-              </div>
-              <div className="h-title mt-4 text-[22px] md:text-[26px] text-white">
-                {c.work.endTitle}
-              </div>
-              <div className="body-copy mt-3 text-[13.5px] text-white/60 max-w-[36ch]">
-                {c.work.endSub}
-              </div>
-              <div className="mt-7 inline-flex items-center gap-2 bg-lime px-6 py-3 text-[13px] font-semibold text-ink group-hover:shadow-[0_0_25px_-5px_rgba(223,255,0,0.5)] transition-shadow">
-                <span>{c.work.endCta}</span>
-                <span>↗</span>
-              </div>
-            </a>
-          </motion.div>
+                {/* Content Details */}
+                <div className="p-5 md:p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="h-sub text-[16px] md:text-[18px] text-white group-hover:text-lime transition-colors">
+                      {w.title}
+                    </h3>
+                    <p className="mt-2 text-[12.5px] leading-relaxed text-white/60 line-clamp-2">
+                      {w.meta}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-3.5">
+                    <span className="text-[11.5px] text-lime/80 font-medium group-hover:text-lime flex items-center gap-1">
+                      <span>{lang === "ar" ? "عرض التفاصيل" : "View Details"}</span>
+                      <span className="font-display text-[10px]">{dir === "rtl" ? "←" : "→"}</span>
+                    </span>
+                    <span className="text-[10px] text-white/30 font-display">TAM PROJECT</span>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
+          </AnimatePresence>
+
+          {/* End CTA Card docking naturally in the grid */}
+          <a
+            href="#contact"
+            className="group flex flex-col justify-center items-center border border-lime/40 bg-lime/[0.04] p-8 text-center transition-all duration-300 hover:border-lime hover:bg-lime/[0.08] hover:-translate-y-1"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-lime/50 text-lime mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-xl">↗</span>
+            </div>
+            <div className="font-display text-[10.5px] tracking-[0.24em] text-lime font-bold">
+              {c.work.nextLabel}
+            </div>
+            <div className="h-title mt-2 text-[20px] md:text-[22px] text-white">
+              {c.work.endTitle}
+            </div>
+            <div className="body-copy mt-2 text-[13px] text-white/60 max-w-[32ch]">
+              {c.work.endSub}
+            </div>
+            <div className="mt-6 inline-flex items-center gap-2 bg-lime px-5 py-2.5 text-[12.5px] font-bold text-ink">
+              <span>{c.work.endCta}</span>
+              <span>↗</span>
+            </div>
+          </a>
+        </motion.div>
+
+        {/* Verification Note */}
+        <div className="mt-12 text-center text-[11px] text-white/35 max-w-[80ch] mx-auto">
+          {c.work.note}
         </div>
       </div>
+
+      {/* Lightbox / Project Details Modal */}
+      <AnimatePresence>
+        {selectedProject && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md"
+            onClick={() => setSelectedProject(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto border border-white/20 bg-ink p-6 md:p-8 shadow-2xl"
+              dir={dir}
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setSelectedProject(null)}
+                className="absolute top-4 end-4 flex h-8 w-8 items-center justify-center border border-white/20 text-white/70 hover:border-lime hover:text-lime transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+
+              <div className="relative aspect-[16/10] overflow-hidden border border-white/10 bg-black">
+                <img
+                  src={selectedProject.img}
+                  alt={selectedProject.title}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+
+              <div className="mt-6">
+                <div className="flex items-center gap-2">
+                  <span className="border border-lime/40 bg-lime/10 px-2.5 py-0.5 text-xs text-lime font-medium">
+                    {selectedProject.tag}
+                  </span>
+                  <span className="text-xs text-white/40">TAM Company Profile Project</span>
+                </div>
+                <h3 className="h-title mt-3 text-[22px] md:text-[26px] text-white">
+                  {selectedProject.title}
+                </h3>
+                <p className="mt-2 text-sm text-lime font-medium">
+                  {selectedProject.meta}
+                </p>
+                {"desc" in selectedProject && selectedProject.desc && (
+                  <p className="body-copy mt-4 text-[14.5px] leading-relaxed text-white/75 border-t border-white/10 pt-4">
+                    {String(selectedProject.desc)}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5">
+                <div className="text-xs text-white/40">
+                  {lang === "ar"
+                    ? "تواصل معنا لتصميم وتنفيذ مشروع مماثل"
+                    : "Contact us to engineer a similar project for your brand"}
+                </div>
+                <a
+                  href="#contact"
+                  onClick={() => setSelectedProject(null)}
+                  className="inline-flex items-center gap-2 bg-lime px-5 py-2.5 text-xs font-bold text-ink hover:bg-lime/90 transition-colors"
+                >
+                  <span>{c.hero.ctaPrimary}</span>
+                  <span>{dir === "rtl" ? "←" : "→"}</span>
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
