@@ -22,15 +22,15 @@ export function About() {
       <div className="relative mx-auto max-w-[1440px] px-5 md:px-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <SectionHead
-            index="0.1"
+            index="01"
             kicker={about.kicker}
             title={about.title}
             lead={about.tag}
           />
           <div className="hidden md:flex items-center gap-3 border border-white/10 px-4 py-2 bg-white/[0.02]">
             <Symbol size={18} />
-            <span className="font-display text-[10px] tracking-[0.24em] text-white/50">
-              CAIRO · EST. 2022
+            <span className={lang === "ar" ? "font-ar text-[11px] text-white/60 font-semibold" : "font-display text-[10px] tracking-[0.24em] text-white/50"}>
+              {lang === "ar" ? "القاهرة · تأسست 2022" : "CAIRO · EST. 2022"}
             </span>
           </div>
         </div>
@@ -54,19 +54,25 @@ export function About() {
             <Reveal delay={0.15}>
               <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-white/10">
                 <div className="border border-white/10 bg-white/[0.02] p-4">
-                  <div className="font-display text-xs text-lime font-bold">01 / ONE ROOF</div>
+                  <div className="font-display text-xs text-lime font-bold">
+                    {lang === "ar" ? "01 / سقف واحد" : "01 / ONE ROOF"}
+                  </div>
                   <div className="mt-1 text-[13px] text-white/80 font-medium">
                     {lang === "ar" ? "شريك واحد مسؤول" : "Single Accountable Partner"}
                   </div>
                 </div>
                 <div className="border border-white/10 bg-white/[0.02] p-4">
-                  <div className="font-display text-xs text-lime font-bold">02 / 100% IN-HOUSE</div>
+                  <div className="font-display text-xs text-lime font-bold">
+                    {lang === "ar" ? "02 / ورشة خاصة 100%" : "02 / 100% IN-HOUSE"}
+                  </div>
                   <div className="mt-1 text-[13px] text-white/80 font-medium">
                     {lang === "ar" ? "ورشة تصنيع خاصة بالكامل" : "100% In-House Workshop"}
                   </div>
                 </div>
                 <div className="border border-white/10 bg-white/[0.02] p-4">
-                  <div className="font-display text-xs text-lime font-bold">03 / ZERO SURPRISES</div>
+                  <div className="font-display text-xs text-lime font-bold">
+                    {lang === "ar" ? "03 / دقة التزام" : "03 / ZERO SURPRISES"}
+                  </div>
                   <div className="mt-1 text-[13px] text-white/80 font-medium">
                     {lang === "ar" ? "صفر مفاجآت وتسليم مبكر" : "Zero Surprises & Early Handover"}
                   </div>
@@ -105,7 +111,7 @@ export function About() {
             <div className="group relative h-full border border-white/12 bg-white/[0.02] p-7 md:p-9 transition-colors duration-300 hover:border-lime/40">
               <div className="flex items-center justify-between">
                 <span className="font-display text-[10px] tracking-[0.24em] font-bold text-lime">
-                  02.A · VISION
+                  {lang === "ar" ? "02.أ · الرؤية" : "02.A · VISION"}
                 </span>
                 <span className="h-2 w-2 rounded-full bg-lime/60 group-hover:bg-lime transition-colors" />
               </div>
@@ -123,7 +129,7 @@ export function About() {
             <div className="group relative h-full border border-white/12 bg-white/[0.02] p-7 md:p-9 transition-colors duration-300 hover:border-lime/40">
               <div className="flex items-center justify-between">
                 <span className="font-display text-[10px] tracking-[0.24em] font-bold text-lime">
-                  02.B · MISSION
+                  {lang === "ar" ? "02.ب · الرسالة" : "02.B · MISSION"}
                 </span>
                 <span className="h-2 w-2 rounded-full bg-lime/60 group-hover:bg-lime transition-colors" />
               </div>

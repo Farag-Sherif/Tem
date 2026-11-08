@@ -109,7 +109,7 @@ export function Journey() {
     <section id="journey" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
-          index="0.3"
+          index="05"
           kicker={c.journey.kicker}
           title={c.journey.title}
           lead={c.journey.lead}

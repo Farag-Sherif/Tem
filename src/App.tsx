@@ -32,14 +32,14 @@ function Site() {
       <Nav />
       <main>
         <Hero />
-        <Glance />
         <About />
+        <Glance />
         <Services />
         <Journey />
         <WorkshopCrew />
         <Work />
-        <Standards />
         <Clients />
+        <Standards />
         <Contact />
       </main>
     </div>

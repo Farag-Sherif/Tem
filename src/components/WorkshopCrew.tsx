@@ -11,7 +11,7 @@ export function WorkshopCrew() {
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <SectionHead
-            index="0.4"
+            index="06"
             kicker={ws.kicker}
             title={ws.title}
             lead={ws.lead}
@@ -38,7 +38,7 @@ export function WorkshopCrew() {
             <div className="group h-full border border-white/10 bg-white/[0.02] p-7 transition-all duration-300 hover:border-lime/40">
               <div className="flex items-center justify-between">
                 <span className="font-display text-[11px] tracking-[0.24em] font-bold text-lime">
-                  01 / CRAFT
+                  {lang === "ar" ? "01 / حِرفة" : "01 / CRAFT"}
                 </span>
                 <span className="text-white/40 font-display text-xs">MDF & CNC</span>
               </div>
@@ -56,7 +56,7 @@ export function WorkshopCrew() {
             <div className="group h-full border border-white/10 bg-white/[0.02] p-7 transition-all duration-300 hover:border-lime/40">
               <div className="flex items-center justify-between">
                 <span className="font-display text-[11px] tracking-[0.24em] font-bold text-lime">
-                  02 / FINISH
+                  {lang === "ar" ? "02 / تشطيب" : "02 / FINISH"}
                 </span>
                 <span className="text-white/40 font-display text-xs">DUCO SPRAY</span>
               </div>
@@ -74,7 +74,7 @@ export function WorkshopCrew() {
             <div className="group h-full border border-white/10 bg-white/[0.02] p-7 transition-all duration-300 hover:border-lime/40">
               <div className="flex items-center justify-between">
                 <span className="font-display text-[11px] tracking-[0.24em] font-bold text-lime">
-                  03 / TECH
+                  {lang === "ar" ? "03 / تقنية" : "03 / TECH"}
                 </span>
                 <span className="text-white/40 font-display text-xs">LED & POWER</span>
               </div>
@@ -184,8 +184,12 @@ export function WorkshopCrew() {
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs font-display text-white/50">
-              <span className="border border-white/20 px-3 py-1.5">0% THIRD PARTIES</span>
-              <span className="border border-lime/40 px-3 py-1.5 text-lime">100% ACCOUNTABILITY</span>
+              <span className="border border-white/20 px-3 py-1.5">
+                {lang === "ar" ? "0% مقاولي باطن" : "0% THIRD PARTIES"}
+              </span>
+              <span className="border border-lime/40 px-3 py-1.5 text-lime">
+                {lang === "ar" ? "100% مسؤولية كاملة" : "100% ACCOUNTABILITY"}
+              </span>
             </div>
           </div>
         </Reveal>

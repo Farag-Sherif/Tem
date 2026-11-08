@@ -11,7 +11,7 @@ export function Clients() {
     <section id="clients" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
-          index="0.6"
+          index="08"
           kicker={c.clients.kicker}
           title={c.clients.title}
           lead={c.clients.lead}

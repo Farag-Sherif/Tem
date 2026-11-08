@@ -2,7 +2,7 @@ import { Reveal } from "./ui/Reveal";
 import { useLang } from "../i18n/LangContext";
 
 export function Glance() {
-  const { c, dir } = useLang();
+  const { c, dir, lang } = useLang();
   const glance = c.glance;
 
   return (
@@ -49,7 +49,7 @@ export function Glance() {
                 {glance.lifecycleTitle}
               </span>
               <span className="font-display text-[9px] sm:text-[9.5px] tracking-[0.2em] text-white/40">
-                100% IN-HOUSE TIMELINE
+                {lang === "ar" ? "جدول زمني داخلي 100%" : "100% IN-HOUSE TIMELINE"}
               </span>
             </div>
 
@@ -69,7 +69,7 @@ export function Glance() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-2.5 font-display text-[11px] sm:text-[12.5px] md:text-[14px] font-bold text-white tracking-tight sm:tracking-normal truncate">
+                  <div className={`mt-2.5 ${lang === "ar" ? "font-ar text-[12px] sm:text-[13px] font-bold" : "font-display text-[9.5px] sm:text-[11px] md:text-[12.5px] font-bold tracking-tight"} text-white break-words sm:truncate`}>
                     {lc.name}
                   </div>
                   <div className="mt-1 text-[10px] sm:text-[11px] text-white/50 truncate">

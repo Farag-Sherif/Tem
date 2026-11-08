@@ -46,6 +46,22 @@ export interface BoothConfigModalProps {
   onComplete?: (data: ConfiguratorData) => void;
 }
 
+export function normalizePhone(val: string): string {
+  const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  let res = val;
+  for (let i = 0; i < 10; i++) {
+    res = res.replaceAll(arabicDigits[i], String(i));
+  }
+  return res;
+}
+
+export function isValidPhoneNumber(val: string): boolean {
+  if (!val) return false;
+  const normalized = normalizePhone(val).trim();
+  const cleaned = normalized.replace(/[\s\-\(\)\.]/g, "");
+  return /^\+?[0-9]{8,15}$/.test(cleaned);
+}
+
 export function BoothConfigModal({
   isOpen,
   onClose,
@@ -114,7 +130,8 @@ export function BoothConfigModal({
   const isStep2Valid = Boolean(boothType);
   const isStep3Valid = selectedStyles.length > 0 && industry.trim().length > 0 && selectedColors.length > 0;
   const isStep4Valid = selectedFeatures.length > 0;
-  const isStep5Valid = name.trim().length >= 2 && phone.trim().length >= 5 && budget >= 1000;
+  const isPhoneValid = isValidPhoneNumber(phone);
+  const isStep5Valid = name.trim().length >= 2 && isPhoneValid && budget >= 1000;
 
   // Strict step accessibility gate
   const canAccessStep = (targetStep: number): boolean => {
@@ -161,7 +178,13 @@ export function BoothConfigModal({
       case 4:
         return isStep4Valid ? "" : c.configurator.validation.step4;
       case 5:
-        return isStep5Valid ? "" : c.configurator.validation.step5;
+        return isStep5Valid
+          ? ""
+          : phone.trim().length > 0 && !isPhoneValid
+          ? lang === "ar"
+            ? "يرجى إدخال رقم هاتف صحيح (أرقام فقط، من 8 إلى 15 رقم)"
+            : "Please enter a valid phone number (digits only, 8-15 digits)"
+          : c.configurator.validation.step5;
       default:
         return "";
     }
@@ -946,16 +969,28 @@ export function BoothConfigModal({
                           <span>
                             {c.configurator.step5.phone} <span className="text-lime">*</span>
                           </span>
-                          {phone && <span className="text-[10px] text-lime font-mono">✓</span>}
+                          {isPhoneValid && <span className="text-[10px] text-lime font-mono">✓</span>}
                         </label>
                         <input
-                          type="text"
+                          type="tel"
+                          inputMode="tel"
                           required
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
+                          onChange={(e) => setPhone(normalizePhone(e.target.value))}
                           placeholder={c.configurator.step5.phonePh}
-                          className="mt-2 w-full border-b border-white/20 bg-transparent py-2 text-xs md:text-sm text-white outline-none focus:border-lime placeholder:text-white/25 transition-colors"
+                          className={`mt-2 w-full border-b bg-transparent py-2 text-xs md:text-sm text-white outline-none transition-colors ${
+                            phone.trim().length > 0 && !isPhoneValid
+                              ? "border-red-500 focus:border-red-400"
+                              : "border-white/20 focus:border-lime placeholder:text-white/25"
+                          }`}
                         />
+                        {phone.trim().length > 0 && !isPhoneValid && (
+                          <p className="mt-1.5 text-[11px] text-red-400 font-medium">
+                            {lang === "ar"
+                              ? "يرجى إدخال رقم هاتف صالح (أرقام فقط، من 8 إلى 15 رقم)"
+                              : "Please enter a valid phone number (digits only, 8 to 15 digits)"}
+                          </p>
+                        )}
                       </div>
                       <div>
                         <label className="kicker text-[11px] text-white/50 block">

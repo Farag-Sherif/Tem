@@ -3,7 +3,7 @@ import { useLang } from "../i18n/LangContext";
 import { SectionHead } from "./ui/SectionHead";
 
 export function Services() {
-  const { c, dir } = useLang();
+  const { c, dir, lang } = useLang();
   const stages = c.services.stages || c.services.items;
   const andMore = c.services.andMoreItems;
 
@@ -12,7 +12,7 @@ export function Services() {
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <SectionHead
-            index="0.2"
+            index="04"
             kicker={c.services.kicker}
             title={c.services.title}
             lead={c.services.lead}
@@ -63,7 +63,7 @@ export function Services() {
                 <div className="relative z-10 flex h-full flex-col p-6 md:p-8">
                   <div className="flex items-start justify-between gap-4">
                     <span className="font-display text-[11px] tracking-[0.24em] font-bold text-lime">
-                      STAGE {s.n}
+                      {lang === "ar" ? `المرحلة ${s.n}` : `STAGE ${s.n}`}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {s.tags.map((tag) => (
@@ -114,7 +114,7 @@ export function Services() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
                 <span className="kicker text-lime font-bold text-[11px] tracking-wider">
-                  & MORE DISPLAY SOLUTIONS · حلول العرض الإضافية
+                  {lang === "ar" ? "حلول العرض الإضافية & MORE" : "& MORE DISPLAY SOLUTIONS"}
                 </span>
                 <h3 className="h-title mt-2 text-white text-[22px] md:text-[26px]">
                   {c.services.andMoreTitle}

@@ -197,11 +197,46 @@ function mergeSiteData(base: CopyShape, site: SitePayload | null): CopyShape {
   return merged;
 }
 
+function getInitialLang(): Lang {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("tam_lang");
+      if (stored === "ar" || stored === "en") {
+        return stored;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return "en";
+}
+
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>(getInitialLang);
   const [siteData, setSiteData] = useState<SitePayload | null>(null);
   const [apiStatus, setApiStatus] = useState<"idle" | "loading" | "live" | "fallback">("idle");
   const dir = lang === "ar" ? "rtl" : "ltr";
+
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l);
+    try {
+      localStorage.setItem("tam_lang", l);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggle = useCallback(() => {
+    setLangState((curr) => {
+      const next = curr === "ar" ? "en" : "ar";
+      try {
+        localStorage.setItem("tam_lang", next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
 
   const fetchSiteData = useCallback(async (currentLang: Lang) => {
     try {
@@ -250,8 +285,6 @@ export function LangProvider({ children }: { children: ReactNode }) {
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", copy[lang].meta.desc);
   }, [lang, dir]);
-
-  const toggle = useCallback(() => setLang((l) => (l === "ar" ? "en" : "ar")), []);
 
   const c = useMemo(() => {
     return mergeSiteData(copy[lang], siteData);

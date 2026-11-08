@@ -176,8 +176,8 @@ export function Hero() {
             ) : (
               <div className="flex items-center gap-2 text-white/40">
                 <span className="h-1.5 w-1.5 rounded-full bg-lime/70" />
-                <span className="font-display text-[9.5px] tracking-[0.22em] text-white/50">
-                  EST. 2022 · 100% IN-HOUSE WORKSHOP
+                <span className={lang === "ar" ? "font-ar text-[11px] font-semibold text-white/60" : "font-display text-[9.5px] tracking-[0.22em] text-white/50"}>
+                  {lang === "ar" ? "تأسست 2022 · ورشة تصنيع خاصة 100%" : "EST. 2022 · 100% IN-HOUSE WORKSHOP"}
                 </span>
               </div>
             )}
@@ -358,7 +358,7 @@ export function Hero() {
         <Marquee
           items={c.hero.ticker}
           speed={28}
-          className="text-white/35 font-display text-[10.5px] tracking-[0.24em]"
+          className={`text-white/35 ${lang === "ar" ? "font-ar font-bold text-[12px]" : "font-display text-[10.5px] tracking-[0.24em]"}`}
           itemClassName="hover:text-lime transition-colors duration-300"
         />
       </div>

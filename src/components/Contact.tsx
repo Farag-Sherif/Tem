@@ -4,7 +4,7 @@ import { useLang } from "../i18n/LangContext";
 import { Reveal } from "./ui/Reveal";
 import { Symbol } from "./ui/Symbol";
 import { Marquee } from "./ui/Marquee";
-import { BoothConfigModal, type ConfiguratorData } from "./BoothConfigModal";
+import { BoothConfigModal, type ConfiguratorData, normalizePhone, isValidPhoneNumber } from "./BoothConfigModal";
 import { submitBrief, RateLimitError } from "../api/client";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -34,6 +34,16 @@ export function Contact() {
     e.preventDefault();
     setSubmitting(true);
     setErrorMessage(null);
+
+    if (!isValidPhoneNumber(reach)) {
+      setErrorMessage(
+        lang === "ar"
+          ? "يرجى إدخال رقم هاتف صالح للتواصل (أرقام فقط، من 8 إلى 15 رقم)."
+          : "Please enter a valid phone number (digits only, 8 to 15 digits)."
+      );
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const res = await submitBrief({
@@ -127,9 +137,11 @@ export function Contact() {
                 <label className="block">
                   <span className="kicker text-[11px] text-white/50">{c.contact.reach}</span>
                   <input
+                    type="tel"
+                    inputMode="tel"
                     required
                     value={reach}
-                    onChange={(e) => setReach(e.target.value)}
+                    onChange={(e) => setReach(normalizePhone(e.target.value))}
                     placeholder={c.contact.reachPh}
                     className="mt-2 w-full border-b border-white/20 bg-transparent py-2.5 text-[14.5px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-lime"
                   />
@@ -180,7 +192,7 @@ export function Contact() {
                     onClick={() => setIsModalOpen(true)}
                     className="inline-flex items-center gap-2 border border-lime/50 bg-lime/[0.08] px-6 py-3.5 text-[13.5px] font-bold text-lime backdrop-blur-md transition-all duration-300 hover:border-lime hover:bg-lime hover:text-ink hover:shadow-[0_0_25px_rgba(223,255,0,0.4)] hover:-translate-y-0.5"
                   >
-                    <span className="font-display text-sm leading-none">+</span>
+                    <span className="font-display text-sm leading-none" aria-hidden="true">+</span>
                     <span>{c.contact.addDetailsBtn}</span>
                   </button>
 
@@ -288,7 +300,7 @@ export function Contact() {
               <div className="mt-8 flex items-center gap-3 border-t border-white/10 pt-4">
                 <Symbol size={22} />
                 <span className="font-display text-[9.5px] tracking-[0.24em] text-white/40">
-                  BUILT PIECE BY PIECE
+                  {lang === "ar" ? "صُنع قطعة تلو الأخرى" : "BUILT PIECE BY PIECE"}
                 </span>
               </div>
             </div>

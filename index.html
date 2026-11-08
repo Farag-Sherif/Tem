@@ -10,6 +10,20 @@
     />
     <meta name="theme-color" content="#0F1103" />
     <link rel="icon" type="image/png" href="/brand/favicon.png" />
+    <script>
+      (function() {
+        try {
+          var l = localStorage.getItem('tam_lang');
+          if (l === 'ar') {
+            document.documentElement.lang = 'ar';
+            document.documentElement.dir = 'rtl';
+          } else {
+            document.documentElement.lang = 'en';
+            document.documentElement.dir = 'ltr';
+          }
+        } catch(e) {}
+      })();
+    </script>
     <link rel="preload" href="/fonts/Syncopate-Bold.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="/fonts/IBMPlexSansArabic-Bold.ttf" as="font" type="font/ttf" crossorigin />
     <meta property="og:title" content="TAM — Booths & more" />

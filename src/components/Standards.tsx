@@ -4,13 +4,13 @@ import { Reveal } from "./ui/Reveal";
 import { Marquee } from "./ui/Marquee";
 
 export function Standards() {
-  const { c } = useLang();
+  const { c, lang } = useLang();
 
   return (
     <section id="standards" className="relative border-t border-white/10 py-20 md:py-28 bg-ink">
       <div className="mx-auto max-w-[1440px] px-5 md:px-8">
         <SectionHead
-          index="0.7"
+          index="09"
           kicker={c.standards.kicker}
           title={c.standards.title}
           lead={c.standards.lead}
@@ -51,7 +51,7 @@ export function Standards() {
           items={c.standards.claim}
           speed={30}
           className="text-white/20 hover:text-white/40 transition-colors"
-          itemClassName="font-display text-[clamp(1.3rem,2.8vw,2.2rem)] font-bold tracking-[0.03em]"
+          itemClassName={lang === "ar" ? "font-ar text-[clamp(1.2rem,2.5vw,2rem)] font-bold" : "font-display text-[clamp(1.3rem,2.8vw,2.2rem)] font-bold tracking-[0.03em]"}
         />
       </div>
     </section>
